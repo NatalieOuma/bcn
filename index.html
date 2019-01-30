@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title> Barcelona´s Districts </title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.0/mapbox-gl-directions.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.0/mapbox-gl-directions.css' type='text/css' />
+    <style>
+        body { 
+          margin:0;
+          padding:0;
+          font-family: Oswald;
+          font-size: Oswald
+      }
+        #map { 
+          position:absolute;
+          top:0; 
+          bottom:0;
+          width:100%;
+      }
+        #panel {
+          background:white;
+          width:300px;
+          border:3px solid rgba(0,0,0,0.05);
+          position: absolute;
+          right:16px;
+          top:16px;
+          padding:10px;
+          box-shadow: 0 0 4px 0 rgba(0,0,0,0.1);
+          color: rgba(0,0,0, 0.5);           
+      }
+      h4{
+       text-transform:uppercase;
+       border-bottom:1px solid rgba(0,0,0,0.1);
+       margin: 0;
+       padding: 16px;
+      }
+
+      ul{
+        list-style-type: none;
+        margin: 0;
+        padding: 16px;
+      }
+
+      ul span{
+        width:10px;
+        height:10px;
+        display:inline-block;
+        background: red; 
+        margin-right: 8px;
+        border-radius: 50%;
+        border: 1px solid;
+      }
+
+      dd{
+         margin-left: 0;
+         font-weight: bold;
+       }
+
+       .mapboxgl-popup-content{
+         font-size: 14px;
+         color: rgba(0,0,0,0.5);
+         min-width: 250px;
+         max-width: 400px;
+         box-shadow: 0 0 4px 0 rgba(0,0,0,0.5);
+       }
+
+       dt{
+         font-size: 12px;
+         margin-bottom: 8px;
+       }
+
+       dl {
+         margin-bottom: 0;
+       }
+
+
+
+
+    
+    
+    </style>
+</head>
+  
+<body>
+
+  <div id='map'></div> 
+  <div id='panel'> 
+    <h4> BARCELONA´S DISTRICTS </h4>
+    <ul>  
+      <li><span style="background:#80b1d3 ;" ></span> Cuitat Vella </li>
+      <li><span style="background:#8dd3c7 ;" ></span> Eixample </li>
+      <li><span style="background:#ffffb3 ;" ></span> Gracia </li>
+      <li><span style="background:#beb9da ;" ></span> Horta-Guinardo </li>
+      <li><span style="background:#fb8274 ;" ></span> Les Corts </li>
+      <li><span style="background:#fdb462 ;" ></span> Nou Barris </li>
+      <li><span style="background:#fccde5 ;" ></span> Sant Andreu </li>
+      <li><span style="background:#bc80bd ;" ></span> Sant Marti </li>
+      <li><span style="background:#d9d9d9 ;" ></span> Sant Monjuic </li>
+      <li><span style="background:#afa73c ;" ></span> Servia-Sant-Gervasi </li>
+     </ul>
+  </div> 
+  
+  <script>
+  var DistrictNames = {
+    "01":"Cuitat Vella",
+    "02":"Eixample",
+    "03":"Gracia",
+    "04":"Horta-Guinardo",
+    "05":"Les Corts",
+    "06":"Nou Barris",
+    "07":"Sant Andreu",
+    "08":"Sant Marti",
+    "09":"Sant Monjuic",
+    "10":"Servia-Sant-Gervasi",
+
+
+
+  };
+  mapboxgl.accessToken = 'pk.eyJ1IjoibmF0YWxpZS1vdW1hIiwiYSI6ImNqcW1vNTE5czI0enU0Mm1iZnY3MGdiZzQifQ.h9ECPH8E4gDgEoZWGWJP6A';
+  var map = new mapboxgl.Map({
+      container: 'map', // container id
+      style: 'mapbox://styles/natalie-ouma/cjrjgpfb92vev2sp2k2j7dj81', // stylesheet location
+      center: [2.150,41.377], // starting position [lng, lat]
+      zoom: 13.43, // starting zoom
+      minZoom: 13.43,
+      maxZoom: 16,
+      bearing: -45.2,
+       /*hash: true,
+      interactive:true*/
+  })
+
+  /*function onClick(event){
+	  console.log("mouse has been clicked");
+	  console.log (event);*/
+  
+
+
+  map.on("mousemove", function(event){
+   
+    if(map.loaded()){
+
+     var Tu = map.queryRenderedFeatures(event.point,{
+         layers:["bcn-js-10d3jg"]
+    });
+
+     map.getCanvas().style.cursor = Tu.length ? 'crosshair': '';
+        
+    }
+  }
+  );
+
+  map.doubleClickZoom.disable();
+  map.on("click", function(event){  
+    var parameters = {
+      layers:["bcn-js-10d3jg"]
+    };
+    var geometry = event.point;
+    var Tu = map.queryRenderedFeatures(geometry,parameters);
+      var Tu0= Tu[0];
+      console.log(Tu.properties);
+      /*console.log (Tu.length + "features");*/
+
+      /*<dl>
+        <dt>District</dt>
+        <dd>District</dd>
+      </dl>*/
+     
+      if (Tu.length) {
+       var District = DistrictNames[Tu0.properties.NDistric] || '–';
+       var Area = Tu0.properties.Area || '–';
+
+       var popup = new mapboxgl.Popup()
+            .setLngLat(event.lngLat)
+            .setHTML('<dl>' +
+                    '<dt>District</dt>' +
+                    '<dd>'  +  District  +  '</dd>' + 
+                    '<dt>Area</dt>' +
+                    '<dd>'  +  Area  +  '</dd>' +
+                '</dl>')
+            .addTo(map)
+        }
+  
+
+
+    
+  });
+
+
+  var nav = new mapboxgl.NavigationControl();
+  map.addControl(nav, 'top-right');
+  var nav1 = new mapboxgl.NavigationControl();
+  map.addControl(nav, 'bottom-left');
+
+  map.addControl(new MapboxDirections({accessToken:mapboxgl.accessToken}), "top-left");
+  
+  console.log(map.queryRenderedFeatures(geometry))
+
+  </script>
+
+</body>
+</html>
